@@ -5,6 +5,10 @@ const User = require("../models/User");
 
 const router = express.Router();
 
+// Define 6 months in milliseconds and seconds
+const SIX_MONTHS_IN_MS = 6 * 30 * 24 * 60 * 60 * 1000; // ~6 months
+const SIX_MONTHS_IN_SEC = 6 * 30 * 24 * 60 * 60; // ~6 months
+
 // Register
 router.post("/register", async (req, res) => {
   try {
@@ -27,13 +31,13 @@ router.post("/register", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: "7d" }
+      { expiresIn: SIX_MONTHS_IN_SEC } // 6 months
     );
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: SIX_MONTHS_IN_MS, // 6 months
     });
 
     res.status(201).json({
@@ -61,13 +65,13 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: "7d" }
+      { expiresIn: SIX_MONTHS_IN_SEC }
     );
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: SIX_MONTHS_IN_MS,
     });
 
     res.json({

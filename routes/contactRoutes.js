@@ -7,10 +7,14 @@ const {
 
 const router = express.Router();
 
-// Submit contact form
+// POST /api/contact - Submit contact form
 router.post("/", async (req, res) => {
   try {
     const { name, email, phone, subject, message, serviceType } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ message: "Required fields are missing." });
+    }
 
     const contact = new Contact({
       name,
@@ -20,21 +24,33 @@ router.post("/", async (req, res) => {
       message,
       serviceType,
     });
+
     await contact.save();
 
-    res.status(201).json({ message: "Contact form submitted" });
+    res
+      .status(201)
+      .json({
+        message: "Your message has been received. We'll be in touch soon!",
+      });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to submit contact form", error: error.message });
   }
 });
 
-// Get all contact submissions (admin only)
+// GET /api/contact - Get all contact submissions (admin only)
 router.get("/", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
-    res.json(contacts);
+    res.status(200).json(contacts);
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res
+      .status(500)
+      .json({
+        message: "Failed to fetch contact submissions",
+        error: error.message,
+      });
   }
 });
 
